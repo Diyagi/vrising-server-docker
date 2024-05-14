@@ -1,0 +1,21 @@
+version: '3.3'
+services:
+  vrising:
+    image: diyagi/vrising-server-docker
+    ports:
+      - 9876:9876/udp
+      - 9877:9877/udp
+    environment:
+      TZ: "America/Los_Angeles"
+      PUID: 1001
+      PGID: 1001
+      VR_NAME: "V Rising Docker Server"
+      VR_DESCRIPTION: "V Rising server hosted on Docker"
+      VR_GAME_PORT: 9876
+      VR_QUERY_PORT: 9877
+      VR_LIST_ON_EOS: true
+      VR_LIST_ON_STEAM: true
+      VR_SAVE_NAME: "dockerWorld"
+    volumes:
+    - ./awesome-vrising-server/server:/vrising/server
+    - ./awesome-vrising-server/data:/vrising/data
