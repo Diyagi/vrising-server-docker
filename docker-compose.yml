@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   vrising:
-    image: diyagi/vrising-server-docker
+    image: diyagi/vrising-server-docker:latest
     ports:
       - 9876:9876/udp
       - 9877:9877/udp
