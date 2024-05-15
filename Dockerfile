@@ -1,4 +1,4 @@
-FROM diyagi/steamcmd-wine:root-noble
+FROM diyagi/steamcmd-wine:root-noble as base-steamcmd-wine
 
 LABEL maintainer="github@diyagi.dev" \
       name="diyagi/vrising-server-docker" \
