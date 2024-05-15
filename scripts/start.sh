@@ -46,6 +46,16 @@ else
   "${SCRIPTSDIR}"/compile-hostsettings.sh || exit
 fi
 
+if [ "${COMPILE_GAME_SETTINGS,,}" = false ]; then
+  LogAction "GENERATING GAME SETTINGS"
+  LogWarn "Game Settings env vars will not be applied due to COMPILE_GAME_SETTINGS being set to FALSE!"
+
+else
+  LogAction "GENERATING GAME SETTINGS"
+  LogInfo "Using Env vars to create ServerGameSettings.json"
+  "${SCRIPTSDIR}"/compile-gamesettings.sh || exit
+fi
+
 LogAction "Starting Server"
 
 LogInfo "Starting Xvfb"
