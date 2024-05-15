@@ -62,4 +62,4 @@ LogInfo "Starting Xvfb"
 Xvfb :0 -screen 0 1024x768x16 &
 
 LogInfo "Launching wine64 V Rising"
-DISPLAY=:0.0 /usr/lib/wine/wine64 "${STEAMAPPSERVER}"/VRisingServer.exe -persistentDataPath "${STEAMAPPDATA}" > >(WineStdout) 2> >(WindeStderr) &
+DISPLAY=:0.0 /usr/lib/wine/wine64 "${STEAMAPPSERVER}"/VRisingServer.exe -persistentDataPath "${STEAMAPPDATA}" > >(WineStdout) 2> >(WindeStderr)
