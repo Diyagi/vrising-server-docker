@@ -45,8 +45,6 @@ fi
 # WINEPREFIX but it complains abt not being owner.
 trap 'su steam -c "$SCRIPTSDIR/shutdown_gameserver.sh"' SIGTERM
 
-# sleep infinity
-
 #Restart cleanup
 if [ -f "/tmp/.X0-lock" ]; then rm /tmp/.X0-lock; fi
 
