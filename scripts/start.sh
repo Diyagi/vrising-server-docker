@@ -56,6 +56,8 @@ else
   "${SCRIPTSDIR}"/compile-gamesettings.sh || exit
 fi
 
+ParseRCONAccess
+
 LogAction "Starting Server"
 
 LogInfo "Starting Xvfb"

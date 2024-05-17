@@ -15,6 +15,11 @@ RUN apt-get update -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Download gorcon
+ARG GORCON_VERSION=0.10.3
+RUN curl -fsSL -o rconcli.tar.gz https://github.com/gorcon/rcon-cli/releases/download/v${GORCON_VERSION}/rcon-${GORCON_VERSION}-amd64_linux.tar.gz \
+    && tar -xf rconcli.tar.gz --strip-components=1 --transform 's/rcon/rcon-cli/g' -C /usr/bin/ rcon-${GORCON_VERSION}-amd64_linux/rcon
+
 ENV STEAMAPP vrising
 ENV STEAMAPPDIR "/${STEAMAPP}"
 ENV STEAMAPPSERVER "${STEAMAPPDIR}/server"
@@ -82,7 +87,10 @@ RUN mkdir ${STEAMAPPDIR} ${STEAMAPPSERVER} ${STEAMAPPDATA} ${SCRIPTSDIR}
 
 COPY ./scripts ${SCRIPTSDIR}
 
-RUN chown steam:steam -R ${STEAMAPPDIR} \
+WORKDIR ${SCRIPTSDIR}
+
+RUN touch rcon.yaml \
+    && chown steam:steam -R ${STEAMAPPDIR} \
     && chmod +x ${SCRIPTSDIR}/*.sh \
     && mkdir /tmp/.X11-unix \
     && chmod 1777 /tmp/.X11-unix \

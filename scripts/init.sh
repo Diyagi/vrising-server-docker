@@ -49,11 +49,11 @@ trap 'su steam -c "$SCRIPTSDIR/shutdown_gameserver.sh"' SIGTERM
 if [ -f "/tmp/.X0-lock" ]; then rm /tmp/.X0-lock; fi
 
 if [[ "$(id -u)" -eq 0 ]]; then
-    su steam -c "$SCRIPTSDIR/start.sh" 2>&1 | tee >(sed 's/\x1B\[[0-9;]*[JKmsu]//g' > "$ContainerLog") >&2 &
+    su steam -c "$SCRIPTSDIR/start.sh" > >(LogCleanOutput) 2> >(LogCleanOutput >&2) &
 else
-    "$SCRIPTSDIR/start.sh" 2>&1 | tee >(sed 's/\x1B\[[0-9;]*[JKmsu]//g' > "$ContainerLog") >&2 &
+    "$SCRIPTSDIR/start.sh" > >(LogCleanOutput) 2> >(LogCleanOutput >&2) &
 fi
 
 # Process ID of su
-killpid="$!"
+killpid=$!
 wait "$killpid"

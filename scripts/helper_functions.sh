@@ -117,12 +117,51 @@ Log() {
 #
 WineStdout() {
     while IFS= read -r line; do
-        echo $'\e[1;34m'"$line"$'\e[22m'
+        echo $'\e[1;30m'"$line"$'\e[0m'
     done
 }
 
 WindeStderr() {
     while IFS= read -r line; do
-        >&2 echo $'\e[1;31m'"$line"$'\e[22m'
+        >&2 echo $'\e[1;31m'"$line"$'\e[0m'
     done
+}
+# Function to remove ANSI escape codes and log STDOUT/STDERR
+LogCleanOutput() {
+    tee -a >(sed -u 's/\x1B\[[0-9;]*[JKmsu]//g' > "$LOGSDIR/latest.log")
+}
+
+# Try to parse RCON access info
+ParseRCONAccess() {
+    local host_settings_file="${STEAMAPPDATA}/Settings/ServerHostSettings.json"
+    if ! [ -f "${host_settings_file}" ]; then
+        local file_rcon_enabled
+        file_rcon_enabled=$(jq -r .Rcon.Enabled < "${host_settings_file}")
+        
+        local file_rcon_port
+        file_rcon_port=$(jq -r .Rcon.Port < "${host_settings_file}")
+
+        local file_rcon_password
+        file_rcon_password=$(jq -r .Rcon.Password < "${host_settings_file}")
+    fi
+
+    local rcon_enabled
+    rcon_enabled=${VR_RCON_ENABLED:-"$file_rcon_enabled"}
+
+    local rcon_port
+    rcon_port=${VR_RCON_PORT:-"$file_rcon_port"}
+
+    local rcon_password
+    rcon_password=${VR_RCON_PASSWORD:-"$file_rcon_password"}
+
+    if [ -z "${rcon_enabled}" ] || [ "${rcon_enabled,,}" = false ]; then
+        LogError "Failed to parse RCON info or RCON is disabled"
+        LogError "Anything that uses RCON will not work !"
+        return 0
+
+    fi
+
+    printf "default:\n  address: 127.0.0.1:%s\n  password: %s\n" "$rcon_port" "$rcon_password" \
+    > "${SCRIPTSDIR}/rcon.yaml"
+    return 1
 }
