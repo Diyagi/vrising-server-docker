@@ -132,6 +132,8 @@ LogCleanOutput() {
 }
 
 # Try to parse RCON access info
+# Returns 0 if the parse sucsucceeded
+# Returns 1 if the parse failed or rcon is disabled
 ParseRCONAccess() {
     local host_settings_file="${STEAMAPPDATA}/Settings/ServerHostSettings.json"
     if ! [ -f "${host_settings_file}" ]; then
@@ -155,13 +157,10 @@ ParseRCONAccess() {
     rcon_password=${VR_RCON_PASSWORD:-"$file_rcon_password"}
 
     if [ -z "${rcon_enabled}" ] || [ "${rcon_enabled,,}" = false ]; then
-        LogError "Failed to parse RCON info or RCON is disabled"
-        LogError "Anything that uses RCON will not work !"
-        return 0
-
+        return 1
     fi
 
     printf "default:\n  address: 127.0.0.1:%s\n  password: %s\n" "$rcon_port" "$rcon_password" \
     > "${SCRIPTSDIR}/rcon.yaml"
-    return 1
+    return 0
 }

@@ -7,13 +7,16 @@ IsInstalled() {
   return 1
 }
 
+# Returns 0 if AVX is supported
+# Returns 1 if AVX is not supported
 IsAVXSupported() {
-    if ! grep -q -o 'avx[^ ]*' /proc/cpuinfo; then
-	    return 0
-    fi 
-    return 1
+    grep -q -o 'avx[^ ]*' /proc/cpuinfo
+    return $?
 }
 
+# Returns 0 if Update Required
+# Returns 1 if Update NOT Required
+# Returns 2 if Check Failed
 UpdateRequired() {
   LogAction "Checking for new V Rising Server updates"
 

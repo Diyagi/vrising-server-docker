@@ -13,7 +13,7 @@ cd "${STEAMAPPSERVER}" || exit
 
 IsAVXSupported
 AVXSupport=$?
-if [ "$AVXSupport" == 0 ]; then
+if [ "$AVXSupport" == 1 ]; then
     LogError "AVX is required but not supported on this hardware."
     exit
 fi
@@ -57,6 +57,11 @@ else
 fi
 
 ParseRCONAccess
+export RCON_ENABLED=$?
+if [ "$RCON_ENABLED" == 1 ]; then
+  LogWarn "Failed to parse RCON info or RCON is disabled"
+  LogWarn "Anything that uses RCON will not work !"
+fi
 
 LogAction "Starting Server"
 
