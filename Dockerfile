@@ -15,10 +15,24 @@ RUN apt-get update -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Download gorcon
-ARG GORCON_VERSION=0.10.3
+# set args
+# SUPERCRONIC: Latest releases available at https://github.com/aptible/supercronic/releases
+# RCON: Latest releases available at https://github.com/gorcon/rcon-cli/releases
+ARG GORCON_VERSION="0.10.3"
+ARG GORCON_MD5SUM="8601c70dcab2f90cd842c127f700e398"
+ARG SUPERCRONIC_VERSION="0.2.29"
+ARG SUPERCRONIC_SHA1SUM="cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+
+# Install GoRcon
 RUN curl -fsSL -o rconcli.tar.gz https://github.com/gorcon/rcon-cli/releases/download/v${GORCON_VERSION}/rcon-${GORCON_VERSION}-amd64_linux.tar.gz \
+    && echo "${GORCON_MD5SUM}" rconcli.tar.gz | md5sum -c - \
     && tar -xf rconcli.tar.gz --strip-components=1 --transform 's/rcon/rcon-cli/g' -C /usr/bin/ rcon-${GORCON_VERSION}-amd64_linux/rcon
+
+# Install Supercronic
+RUN curl -fsSL -o supercronic https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/supercronic-linux-amd64 \
+    && echo "${SUPERCRONIC_SHA1SUM}" supercronic | sha1sum -c - \
+    && chmod +x supercronic \
+    && mv supercronic /usr/local/bin/supercronic
 
 ENV STEAMAPP vrising
 ENV STEAMAPPDIR "/${STEAMAPP}"
