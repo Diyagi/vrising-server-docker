@@ -60,8 +60,33 @@ ParseRCONAccess
 export RCON_ENABLED=$?
 if [ "$RCON_ENABLED" == 1 ]; then
   LogWarn "Failed to parse RCON info or RCON is disabled"
-  LogWarn "Anything that uses RCON will not work !"
+  LogWarn "Features that uses RCON will be disabled!"
 fi
+
+LogAction "GENERATING CRONTAB"
+truncate -s 0  "${SCRIPTSDIR}/crontab"
+
+if [ "${AUTO_UPDATE_ENABLED,,}" = true ] && [ "${UPDATE_ON_BOOT}" = true ]; then
+    LogInfo "AUTO_UPDATE_ENABLED=${AUTO_UPDATE_ENABLED,,}"
+    LogInfo "Adding cronjob for auto updating"
+    echo "$AUTO_UPDATE_CRON_EXPRESSION bash ${SCRIPTSDIR}/update.sh" >> "${SCRIPTSDIR}/crontab"
+    supercronic -quiet -test "${SCRIPTSDIR}/crontab" || exit
+fi
+
+if [ "${AUTO_REBOOT_ENABLED,,}" = true ]; then
+    LogInfo "AUTO_REBOOT_ENABLED=${AUTO_REBOOT_ENABLED,,}"
+    LogInfo "Adding cronjob for auto rebooting"
+    echo "$AUTO_REBOOT_CRON_EXPRESSION bash ${SCRIPTSDIR}/auto_reboot.sh" >> "${SCRIPTSDIR}/crontab"
+    supercronic -quiet -test "${SCRIPTSDIR}/crontab" || exit
+fi
+
+if [ -s "${SCRIPTSDIR}/crontab" ]; then
+    supercronic -passthrough-logs "${SCRIPTSDIR}/crontab" &
+    LogInfo "Cronjobs started"
+else
+    LogInfo "No Cronjobs found"
+fi
+
 
 LogAction "Starting Server"
 

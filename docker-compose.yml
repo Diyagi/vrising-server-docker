@@ -2,6 +2,8 @@ version: '3.3'
 services:
   vrising:
     image: diyagi/vrising-server-docker:latest
+    restart: unless-stopped # Required for the restarts to work
+    stop_grace_period: 15s # Might need to increase with longer saves
     ports:
       - 9876:9876/udp
       - 9877:9877/udp

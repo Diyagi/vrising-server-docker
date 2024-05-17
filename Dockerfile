@@ -20,7 +20,7 @@ RUN apt-get update -y \
 # RCON: Latest releases available at https://github.com/gorcon/rcon-cli/releases
 ARG GORCON_VERSION="0.10.3"
 ARG GORCON_MD5SUM="8601c70dcab2f90cd842c127f700e398"
-ARG SUPERCRONIC_VERSION="0.2.29"
+ARG SUPERCRONIC_VERSION="0.2.29"    
 ARG SUPERCRONIC_SHA1SUM="cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 
 # Install GoRcon
@@ -46,6 +46,14 @@ ENV PUID=1000 \
     COMPILE_HOST_SETTINGS=true \
     COMPILE_GAME_SETTINGS=false \
     UPDATE_ON_BOOT=true \
+    AUTO_UPDATE_ENABLED=false \
+    AUTO_UPDATE_CRON_EXPRESSION="0 * * * *" \
+    AUTO_UPDATE_WARN_MINUTES="30,15,10,5,3,2,1" \
+    AUTO_UPDATE_WARN_MESSAGE="Server will restart in ~{t} min. Reason: Scheduled Update" \
+    AUTO_REBOOT_ENABLED=false \
+    AUTO_REBOOT_CRON_EXPRESSION="0 0 * * *" \
+    AUTO_REBOOT_WARN_MINUTES="15,10,5,3,2,1" \
+    AUTO_REBOOT_WARN_MESSAGE="Server will restart in ~{t} min. Reason: Scheduled Restart" \
     FALLBACK_PORT=9878 \
     MIN_FREE_SLOTS_FOR_NEW_USERS=0 \
     AI_UPDATES_PER_FRAME=200 \

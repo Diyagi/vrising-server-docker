@@ -75,6 +75,12 @@ isExecutable() {
     return "$return_val"
 }
 
+# RCON Call
+RCON() {
+  local args="$1"
+  rcon-cli -c "${SCRIPTSDIR}/rcon.yaml" "$args"
+}
+
 #
 # Log Definitions
 #
