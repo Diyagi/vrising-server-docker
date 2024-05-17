@@ -8,10 +8,13 @@
 [![Docker Hub](https://img.shields.io/badge/Docker_Hub-VRising-blue?logo=docker)](https://hub.docker.com/r/diyagi/vrising-server-docker)
 
 
-A Docker container for hosting your own dedicated server.
+A Docker container for hosting your own dedicated server using Ubuntu 24.04 and WineHQ 9.
+<br>This image features gracefully server shutdown, meaning you should not experience rollbacks after an shutdown/restart.
 
->[!WARNING]
-> Only tested with **Ubuntu 24.04** using  **Wine 9**.
+## Acknowledgements
+ - Base image from [CM2Walki/steamcmd](https://github.com/CM2Walki/steamcmd)
+
+ - Code from [palworld-server-docker](https://github.com/thijsvanloef/palworld-server-docker)
 
 ## Getting Started
 
@@ -41,7 +44,8 @@ services:
 ```
 
 >[!TIP]
-> To manually change the `ServerGameSettings.json` or/and `ServerHostSettings.json` you need to set `COMPILE_GAME_SETTINGS` and `COMPILE_HOST_SETTINGS` to `false`.
+> To manually change the `ServerGameSettings.json` and/or `ServerHostSettings.json` you need to set `COMPILE_GAME_SETTINGS` and/or `COMPILE_HOST_SETTINGS` to `false`.
+> <br>When setting `COMPILE_GAME_SETTINGS` or `COMPILE_HOST_SETTINGS` to `true` you are expected to use env vars to configure the server without touching `ServerGameSettings.json` and/or `ServerHostSettings.json`
 
 ## Container Environment variables
 
@@ -56,11 +60,12 @@ services:
 
 
 
-## Game Server Host Environment Variables
+## Host Settings Environment Variables (Game Server)
 
 >[!IMPORTANT]
 > `VR_` prefixed environment variables are used by the **game** server itself, not added by the container.
-
+><br>Because these env vars are read by the game server itself, setting `COMPILE_HOST_SETTINGS` to `false` wont affect how these env vars work. ([Official Doc](https://github.com/StunlockStudios/vrising-dedicated-server-instructions/blob/master/1.0.x/INSTRUCTIONS.md#server-host-settings))
+><br>These env vars will override their respective values in `ServerHostSettings.json`.
 
 | Variable | Type/Default | Description |
 | :------- | :------------|:------------|
@@ -93,7 +98,12 @@ services:
 | `VR_RCON_PASSWORD` | `text` | Password to access RCON. |
 | `VR_RCON_BIND_ADDRESS` | `text` | Binds RCON socket to specified address. Will override the "global" Address setting, if you want to bind to a separate internal interface for instance. |
 
-# Server Host Environment Variables
+# Host Settings Environment Variables 
+
+>[!IMPORTANT]
+> The env vars below are added by the container, when using any of these they will overwrite whats in the `ServerHostSettings.json` file.
+><br>When using these env vars any configuration manually made to `ServerHostSettings.json` will be overwritten, meaning you should only use env vars to configure `ServerHostSettings.json`.
+><br>If you want to manually change the `ServerHostSettings.json` file set the env var `COMPILE_HOST_SETTINGS` to `false`, this will disable all env vars below.
 
 | Variable | Type/Default | Description |
 | :------- | :------------|:------------|
@@ -143,7 +153,31 @@ services:
 | `RCON_MAX_CONNECTIONS` | `20` | Unknown |
 | `RCON_EXPERIMENTAL_COMMANDS_ENABLED` | `true` | Unknown |
 
+# Game Settings Environment Variables
+
+>[!IMPORTANT]
+> The env vars below are added by the container, when using any of these they will overwrite whats in the `ServerGameSettings.json` file.
+><br>When using these env vars any configuration manually made to `ServerGameSettings.json` will be overwritten, meaning you should only use env vars to configure `ServerGameSettings.json`.
+><br>If you want to manually change the `ServerGameSettings.json` file set the env var `COMPILE_GAME_SETTINGS` to `false`, this will disable all env vars below.
+><br>**Not everything in `ServerGameSettings.json` can be configured using env vars, if you need anything thats not covered feel free to open an Issue or PR**
+
+| Variable | Type/Default | Description |
+| :------- | :------------|:------------|
+| `GAME_DIFFICULTY` | `Normal` | Changes the game difficulty. |
+| `GAMEMODE_TYPE` | `PvP` | Changes between `PvP` and `PvE`. |
+| `CLAN_SIZE` | `4` | Max amount players that can join the same Clan. |
+
 ## RCON Commands
+
+>[!IMPORTANT]
+>RCON will only work if its properly configured, either by setting its env vars (`VR_RCON_ENABLED`, `VR_RCON_PORT` and `VR_RCON_PASSWORD`) or by manually configuring it in the `ServerHostSettings.json` file.
+
+To use RCON you can use docker exec:
+```bash
+docker exec -it container-name rcon-cli "<command> <value>"
+```
+
+If you need to external RCON access, remember to expose its port in the container.
 
 | Command | Parameters | Description |
 |---------|:-----------|:------------|
@@ -157,8 +191,3 @@ services:
 | `password` | [password] \| --clear | Set/change/clear the server password during runtime. |
 | `version` | - | Show server version. |
 | `time` | - | Show server time. |
-
-## Acknowledgements
- - Base image from [CM2Walki/steamcmd](https://github.com/CM2Walki/steamcmd)
-
- - Code from [palworld-server-docker](https://github.com/thijsvanloef/palworld-server-docker)
