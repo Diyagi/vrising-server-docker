@@ -24,6 +24,8 @@ Follow this [docker-compose-yml](/docker-compose.yml) example and check [environ
 services:
   vrising:
     image: diyagi/vrising-server-docker:latest
+    restart: unless-stopped # Required for the restarts to work
+    stop_grace_period: 15s # Might need to increase with longer saves
     ports:
       - 9876:9876/udp
       - 9877:9877/udp
@@ -57,6 +59,14 @@ services:
 | `UPDATE_ON_BOOT` | `true` | Checks for updates on start and updates it if needed |
 | `COMPILE_HOST_SETTINGS`| `false` | Disable the generation of `ServerHostSettings.json` using the env vars below. It does not affect the env vars starting with `VR_`, these env vars are used by the gameserver itself |
 | `COMPILE_GAME_SETTINGS`| `false` | Disable the generation of `ServerGameSettings.json` using the env vars. |
+| `AUTO_UPDATE_ENABLED` | `false` | Enable/Disables Auto Update.<br>If docker restart is not set to policy `always` or `unless-stopped` then the server will shutdown and will need to be manually restarted. |
+| `AUTO_UPDATE_CRON_EXPRESSION` | `0 * * * *` | Cron expression to when to run the update check. |
+| `AUTO_UPDATE_WARN_MINUTES` | `30,15,10,5,3,2,1` | How many minutes until restart and announce intervals.<br>Example: `30,15,10,5,3,2,1` will shutdown the server in `30` minutes and announce the shut down at `30,15,10,5,3,2` and `1` minute mark. |
+| `AUTO_UPDATE_WARN_MESSAGE` | `Server will restart in ~{t} min. Reason: Scheduled Update` | Message used to announce the restart.<br>`~{t}` will be replaced in the message by the remaining time until shutdown. |
+| `AUTO_REBOOT_ENABLED` | `false` | Enable/Disable Auto Reboot.<br>If docker restart is not set to policy `always` or `unless-stopped` then the server will shutdown and will need to be manually restarted. |
+| `AUTO_REBOOT_CRON_EXPRESSION` | `0 0 * * *` | Cron expression to when to run the reboot. |
+| `AUTO_REBOOT_WARN_MINUTES` | `15,10,5,3,2,1` | How many minutes until restart and announce intervals.<br>Example: `30,15,10,5,3,2,1` will shutdown the server in `30` minutes and announce the shut down at `30,15,10,5,3,2` and `1` minute mark. |
+| `AUTO_REBOOT_WARN_MESSAGE` | `Server will restart in ~{t} min. Reason: Scheduled Restart` | Message used to announce the restart.<br>`~{t}` will be replaced in the message by the remaining time until shutdown |
 
 
 
@@ -177,7 +187,7 @@ To use RCON you can use docker exec:
 docker exec -it container-name rcon-cli "<command> <value>"
 ```
 
-If you need to external RCON access, remember to expose its port in the container.
+If you need external RCON access, remember to expose its port in the container.
 
 | Command | Parameters | Description |
 |---------|:-----------|:------------|
