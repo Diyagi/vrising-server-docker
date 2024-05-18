@@ -67,16 +67,20 @@ LogAction "GENERATING CRONTAB"
 truncate -s 0  "${SCRIPTSDIR}/crontab"
 
 if [ "${AUTO_UPDATE_ENABLED,,}" = true ] && [ "${UPDATE_ON_BOOT}" = true ]; then
-    LogInfo "AUTO_UPDATE_ENABLED=${AUTO_UPDATE_ENABLED,,}"
     LogInfo "Adding cronjob for auto updating"
     echo "$AUTO_UPDATE_CRON_EXPRESSION bash ${SCRIPTSDIR}/update.sh" >> "${SCRIPTSDIR}/crontab"
     supercronic -quiet -test "${SCRIPTSDIR}/crontab" || exit
 fi
 
 if [ "${AUTO_REBOOT_ENABLED,,}" = true ]; then
-    LogInfo "AUTO_REBOOT_ENABLED=${AUTO_REBOOT_ENABLED,,}"
     LogInfo "Adding cronjob for auto rebooting"
     echo "$AUTO_REBOOT_CRON_EXPRESSION bash ${SCRIPTSDIR}/auto_reboot.sh" >> "${SCRIPTSDIR}/crontab"
+    supercronic -quiet -test "${SCRIPTSDIR}/crontab" || exit
+fi
+
+if [ "${AUTO_ANNOUNCE_ENABLED,,}" = true ]; then
+    LogInfo "Adding cronjob for auto announce"
+    echo "$AUTO_ANNOUNCE_CRON_EXPRESSION bash ${SCRIPTSDIR}/auto_announce.sh" >> "${SCRIPTSDIR}/crontab"
     supercronic -quiet -test "${SCRIPTSDIR}/crontab" || exit
 fi
 

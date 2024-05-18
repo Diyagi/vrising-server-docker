@@ -2,12 +2,12 @@
 # shellcheck source=scripts/helper_functions.sh
 source "${SCRIPTSDIR}/helper_functions.sh"
 
-if [ "${RCON_ENABLED}" = 1 ]; then
+if [[ ${RCON_ENABLED} = 1 ]]; then
     LogWarn "Unable to reboot. RCON is required."
     exit 1
 fi
 
-if [ -z "${AUTO_REBOOT_WARN_MINUTESS}" ]; then
+if [[ -z ${AUTO_REBOOT_WARN_MINUTESS} ]]; then
     LogWarn "Unable to auto update, AUTO_REBOOT_WARN_MINUTES is empty."
     exit 1
 fi

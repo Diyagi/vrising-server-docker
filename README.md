@@ -18,7 +18,7 @@ A Docker container for hosting your own dedicated server using Ubuntu 24.04 and 
 
 ## Getting Started
 
-Follow this [docker-compose-yml](/docker-compose.yml) example and check [environment variables](#Game-Server-Host-Environment-Variables) below for more information.
+Follow this [docker-compose-yml](/docker-compose.yml) example and check [environment variables](#Container-Environment-variables) below for more information.
 
 ```yaml
 services:
@@ -35,6 +35,9 @@ services:
       PGID: 1001
       VR_NAME: "V Rising Docker Server"
       VR_DESCRIPTION: "V Rising server hosted on Docker"
+      VR_RCON_ENABLED: true
+      VR_RCON_PASSWORD: "rconPassword"
+      VR_RCON_PORT: 25575
       VR_GAME_PORT: 9876
       VR_QUERY_PORT: 9877
       VR_LIST_ON_EOS: true
@@ -43,6 +46,8 @@ services:
     volumes:
     - ./awesome-vrising-server/server:/vrising/server
     - ./awesome-vrising-server/data:/vrising/data
+    - ./awesome-vrising-server/announce:/vrising/announce # Only needed if you are using Auto Announce
+
 ```
 
 >[!TIP]
@@ -55,18 +60,20 @@ services:
 | :------- | -----------| :----------- |
 | `PUID` | `1000` | UID used by the container to run the server as |
 | `PGID` | `1000` | GID used by the container to run the server as |
-| `TZ` | `Europe/Brussels` | timezone for ntpdate |
+| `TZ` | `Europe/Brussels` | Timezone, important if you are running Cron tasks. |
 | `UPDATE_ON_BOOT` | `true` | Checks for updates on start and updates it if needed |
 | `COMPILE_HOST_SETTINGS`| `false` | Disable the generation of `ServerHostSettings.json` using the env vars below. It does not affect the env vars starting with `VR_`, these env vars are used by the gameserver itself |
 | `COMPILE_GAME_SETTINGS`| `false` | Disable the generation of `ServerGameSettings.json` using the env vars. |
-| `AUTO_UPDATE_ENABLED` | `false` | Enable/Disables Auto Update.<br>If docker restart is not set to policy `always` or `unless-stopped` then the server will shutdown and will need to be manually restarted. |
+| `AUTO_UPDATE_ENABLED` | `false` | Enable/Disables Auto Update.<br>If docker restart is not set to policy `always` or `unless-stopped` then the server will shutdown and will need to be manually restarted.<br>**Requires RCON** |
 | `AUTO_UPDATE_CRON_EXPRESSION` | `0 * * * *` | Cron expression to when to run the update check. |
 | `AUTO_UPDATE_WARN_MINUTES` | `30,15,10,5,3,2,1` | How many minutes until restart and announce intervals.<br>Example: `30,15,10,5,3,2,1` will shutdown the server in `30` minutes and announce the shut down at `30,15,10,5,3,2` and `1` minute mark. |
 | `AUTO_UPDATE_WARN_MESSAGE` | `Server will restart in ~{t} min. Reason: Scheduled Update` | Message used to announce the restart.<br>`~{t}` will be replaced in the message by the remaining time until shutdown. |
-| `AUTO_REBOOT_ENABLED` | `false` | Enable/Disable Auto Reboot.<br>If docker restart is not set to policy `always` or `unless-stopped` then the server will shutdown and will need to be manually restarted. |
+| `AUTO_REBOOT_ENABLED` | `false` | Enable/Disable Auto Reboot.<br>If docker restart is not set to policy `always` or `unless-stopped` then the server will shutdown and will need to be manually restarted.<br>**Requires RCON** |
 | `AUTO_REBOOT_CRON_EXPRESSION` | `0 0 * * *` | Cron expression to when to run the reboot. |
 | `AUTO_REBOOT_WARN_MINUTES` | `15,10,5,3,2,1` | How many minutes until restart and announce intervals.<br>Example: `30,15,10,5,3,2,1` will shutdown the server in `30` minutes and announce the shut down at `30,15,10,5,3,2` and `1` minute mark. |
 | `AUTO_REBOOT_WARN_MESSAGE` | `Server will restart in ~{t} min. Reason: Scheduled Restart` | Message used to announce the restart.<br>`~{t}` will be replaced in the message by the remaining time until shutdown |
+| `AUTO_ANNOUNCE_ENABLED` | `false` | Enable/Disable Auto Announce of messages. |
+| `AUTO_ANNOUNCE_CRON_EXPRESSION` | `*/10 * * * *` | Cron expression to when to announce messages.<br>Default is every 10 minutes.<br>**Requires RCON** |
 
 
 
@@ -201,3 +208,28 @@ If you need external RCON access, remember to expose its port in the container.
 | `password` | [password] \| --clear | Set/change/clear the server password during runtime. |
 | `version` | - | Show server version. |
 | `time` | - | Show server time. |
+
+## Auto Announce
+
+>[!IMPORTANT]
+>This requires RCON to be enabled !
+
+Auto Announce works by reading text files with the extension `.announce`, each file is one message and the Auto Announce will rotate through each file in a loop.
+<br>The folder containing the `.announce` files must be mounted inside the container to the path `/vrising/announce`.
+<br>The time between each message can be configured using cron expression with the env var `AUTO_ANNOUNCE_CRON_EXPRESSION`.
+
+It is recommended to follow this pattern to name the `.announce` files:
+<br>`00-something.announce` `01-something.announce`
+<br>The first 2 numbers will dictate the order of the message, meaning `00` will be the first message to be displayed and after the amount of time configured with `AUTO_ANNOUNCE_CRON_EXPRESSION` the message `01` will be displayed.
+<br>You can replace `something` in the file name with anything that helps you identify the message inside it.
+
+>[!IMPORTANT]
+>Announces are limited to 510 characters, this is an limit imposed by the game.
+
+After mounting the `announce` folder with the messages inside it, you can test each message by running the following command with the message number as the parameter (like `00` or `01`) while the server is running:
+```bash
+docker exec -it container-name testannounce <message number>
+```
+
+Messages can be modified while the server is running, but the cron expression (`AUTO_ANNOUNCE_CRON_EXPRESSION`) requires an restart to apply.
+<br>More info about message formatting for the announcements (like colors!) [here](https://github.com/Diyagi/vrising-server-docker/wiki/Formatting-announce-messages).

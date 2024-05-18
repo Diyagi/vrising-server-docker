@@ -11,21 +11,21 @@ source "${SCRIPTSDIR}/helper_install.sh"
 UpdateRequired
 updateRequired=$?
 # Check if Update was actually required
-if [ "$updateRequired" != 0 ]; then
+if [[ $updateRequired != 0 ]]; then
   exit 0
 fi
 
-if [ "${UPDATE_ON_BOOT,,}" != true ]; then
+if [[ ${UPDATE_ON_BOOT,,} != true ]]; then
     LogWarn "An update is available however, UPDATE_ON_BOOT needs to be enabled for auto updating"
     exit 1
 fi
 
-if [ "${RCON_ENABLED,,}" != 0 ]; then
+if [[ ${RCON_ENABLED,,} != 0 ]]; then
     LogWarn "An update is available however auto updating without rcon is not supported"
     exit 1
 fi
 
-if [ -z "${AUTO_UPDATE_WARN_MINUTES}" ]; then
+if [[ -z ${AUTO_UPDATE_WARN_MINUTES} ]]; then
     LogWarn "Unable to auto update, AUTO_UPDATE_WARN_MINUTES is empty."
     exit 1
 fi

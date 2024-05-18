@@ -40,6 +40,7 @@ ENV STEAMAPPSERVER "${STEAMAPPDIR}/server"
 ENV STEAMAPPDATA "${STEAMAPPDIR}/data"
 ENV LOGSDIR "${STEAMAPPDATA}/logs"
 ENV SCRIPTSDIR "${STEAMAPPDIR}/scripts"
+ENV ANNOUNCEDIR "${STEAMAPPDIR}/announce"
 
 ENV PUID=1000 \
     PGID=1000 \
@@ -54,6 +55,8 @@ ENV PUID=1000 \
     AUTO_REBOOT_CRON_EXPRESSION="0 0 * * *" \
     AUTO_REBOOT_WARN_MINUTES="15,10,5,3,2,1" \
     AUTO_REBOOT_WARN_MESSAGE="Server will restart in ~{t} min. Reason: Scheduled Restart" \
+    AUTO_ANNOUNCE_ENABLED=false \
+    AUTO_ANNOUNCE_CRON_EXPRESSION="*/10 * * * *" \
     FALLBACK_PORT=9878 \
     MIN_FREE_SLOTS_FOR_NEW_USERS=0 \
     AI_UPDATES_PER_FRAME=200 \
@@ -105,17 +108,18 @@ ENV PUID=1000 \
 
 
 # Build directories
-RUN mkdir ${STEAMAPPDIR} ${STEAMAPPSERVER} ${STEAMAPPDATA} ${SCRIPTSDIR}
+RUN mkdir ${STEAMAPPDIR} ${STEAMAPPSERVER} ${STEAMAPPDATA} ${SCRIPTSDIR} ${ANNOUNCEDIR}
 
 COPY ./scripts ${SCRIPTSDIR}
 
 WORKDIR ${SCRIPTSDIR}
 
-RUN touch rcon.yaml \
+RUN touch ${SCRIPTSDIR}/rcon.yaml \
     && chown steam:steam -R ${STEAMAPPDIR} \
     && chmod +x ${SCRIPTSDIR}/*.sh \
+    && mv ${SCRIPTSDIR}/testannounce.sh /usr/local/bin/testannounce \
     && mkdir /tmp/.X11-unix \
     && chmod 1777 /tmp/.X11-unix \
-    && chown root /tmp/.X11-unix 
+    && chown root /tmp/.X11-unix
 
 CMD ["/vrising/scripts/init.sh"]
