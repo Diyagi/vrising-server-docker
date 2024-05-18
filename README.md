@@ -7,9 +7,11 @@
 [![Image Size](https://img.shields.io/docker/image-size/diyagi/vrising-server-docker/latest)](https://hub.docker.com/r/diyagi/vrising-server-docker/tags)
 [![Docker Hub](https://img.shields.io/badge/Docker_Hub-VRising-blue?logo=docker)](https://hub.docker.com/r/diyagi/vrising-server-docker)
 
-
+>[!NOTE]
+> This image features ✨**gracefully server shutdown**✨, meaning you should not experience rollbacks after an shutdown/restart.
+<br>
 A Docker container for hosting your own dedicated server using Ubuntu 24.04 and WineHQ 9.
-<br>This image features gracefully server shutdown, meaning you should not experience rollbacks after an shutdown/restart.
+<br>
 
 ## Acknowledgements
  - Base image from [CM2Walki/steamcmd](https://github.com/CM2Walki/steamcmd)
@@ -18,7 +20,7 @@ A Docker container for hosting your own dedicated server using Ubuntu 24.04 and 
 
 ## Getting Started
 
-Follow this [docker-compose-yml](/docker-compose.yml) example and check [environment variables](#Container-Environment-variables) below for more information.
+Follow this [docker-compose-yml](/docker-compose.yml) example and check [environment variables](#container-environment-variables) below for more information.
 
 ```yaml
 services:
@@ -52,9 +54,10 @@ services:
 
 >[!TIP]
 > To manually change the `ServerGameSettings.json` and/or `ServerHostSettings.json` you need to set `COMPILE_GAME_SETTINGS` and/or `COMPILE_HOST_SETTINGS` to `false`.
-> <br>When setting `COMPILE_GAME_SETTINGS` or `COMPILE_HOST_SETTINGS` to `true` you are expected to use env vars to configure the server without touching `ServerGameSettings.json` and/or `ServerHostSettings.json`
+>
+> When setting `COMPILE_GAME_SETTINGS` or `COMPILE_HOST_SETTINGS` to `true` you are expected to use environment variables to configure the server without touching `ServerGameSettings.json` and/or `ServerHostSettings.json`
 
-## Container Environment variables
+## Container Environment Variables
 
 | Variable | Type/Default | Description |
 | :------- | -----------| :----------- |
@@ -81,8 +84,10 @@ services:
 
 >[!IMPORTANT]
 > `VR_` prefixed environment variables are used by the **game** server itself, not added by the container.
-><br>Because these env vars are read by the game server itself, setting `COMPILE_HOST_SETTINGS` to `false` wont affect how these env vars work. ([Official Doc](https://github.com/StunlockStudios/vrising-dedicated-server-instructions/blob/master/1.0.x/INSTRUCTIONS.md#server-host-settings))
-><br>These env vars will override their respective values in `ServerHostSettings.json`.
+>
+> Because these are read by the game server itself, setting `COMPILE_HOST_SETTINGS` to `false` won't affect how these environment variables work. [Official Doc](https://github.com/StunlockStudios/vrising-dedicated-server-instructions/blob/master/1.0.x/INSTRUCTIONS.md#server-host-settings).
+>
+> These environment variables will **override** their respective values in `ServerHostSettings.json`.
 
 | Variable | Type/Default | Description |
 | :------- | :------------|:------------|
@@ -118,9 +123,11 @@ services:
 # Host Settings Environment Variables 
 
 >[!IMPORTANT]
-> The env vars below are added by the container, when using any of these they will overwrite whats in the `ServerHostSettings.json` file.
-><br>When using these env vars any configuration manually made to `ServerHostSettings.json` will be overwritten, meaning you should only use env vars to configure `ServerHostSettings.json`.
-><br>If you want to manually change the `ServerHostSettings.json` file set the env var `COMPILE_HOST_SETTINGS` to `false`, this will disable all env vars below.
+> The environment variables below are added by the container, when using any of these they will **overwrite** what's in the `ServerHostSettings.json` file.
+>
+> When using these environment variables any configuration manually made to `ServerHostSettings.json` will be **overwritten**, meaning you should only use environment variables to configure `ServerHostSettings.json`.
+>
+> If you want to **manually** change the `ServerHostSettings.json` file set `COMPILE_HOST_SETTINGS` to `false`, this will disable all environment variables below.
 
 | Variable | Type/Default | Description |
 | :------- | :------------|:------------|
@@ -173,10 +180,18 @@ services:
 # Game Settings Environment Variables
 
 >[!IMPORTANT]
-> The env vars below are added by the container, when using any of these they will overwrite whats in the `ServerGameSettings.json` file.
-><br>When using these env vars any configuration manually made to `ServerGameSettings.json` will be overwritten, meaning you should only use env vars to configure `ServerGameSettings.json`.
-><br>If you want to manually change the `ServerGameSettings.json` file set the env var `COMPILE_GAME_SETTINGS` to `false`, this will disable all env vars below.
-><br>**Not everything in `ServerGameSettings.json` can be configured using env vars, if you need anything thats not covered feel free to open an Issue or PR**
+> The environment variables below are added by the container, when using any of these they will **overwrite** what's in the `ServerGameSettings.json` file.
+>
+> When using these environment variables any configuration manually made to `ServerGameSettings.json` will be **overwritten**, meaning you should only use environment variables to configure `ServerGameSettings.json`.
+>
+> If you want to **manually** change the `ServerGameSettings.json` file set `COMPILE_GAME_SETTINGS` to `false`, this will disable all environment variables below.
+
+
+>[!NOTE]
+> Not everything in `ServerGameSettings.json` can be configured using environment variables.
+>
+> If you need anything that's not covered feel free to open an Issue or PR.
+
 
 | Variable | Type/Default | Description |
 | :------- | :------------|:------------|
@@ -186,15 +201,15 @@ services:
 
 ## RCON Commands
 
->[!IMPORTANT]
->RCON will only work if its properly configured, either by setting its env vars (`VR_RCON_ENABLED`, `VR_RCON_PORT` and `VR_RCON_PASSWORD`) or by manually configuring it in the `ServerHostSettings.json` file.
+>[!WARNING]
+> RCON will only work if it's properly configured, either by setting it's environment variables (`VR_RCON_ENABLED`, `VR_RCON_PORT` and `VR_RCON_PASSWORD`) or by manually configuring it in the `ServerHostSettings.json` file.
 
 To use RCON you can use docker exec:
 ```bash
 docker exec -it container-name rcon-cli "<command> <value>"
 ```
 
-If you need external RCON access, remember to expose its port in the container.
+If you need external RCON access, remember to expose it's port in the container.
 
 | Command | Parameters | Description |
 |---------|:-----------|:------------|
@@ -216,20 +231,20 @@ If you need external RCON access, remember to expose its port in the container.
 
 Auto Announce works by reading text files with the extension `.announce`, each file is one message and the Auto Announce will rotate through each file in a loop.
 <br>The folder containing the `.announce` files must be mounted inside the container to the path `/vrising/announce`.
-<br>The time between each message can be configured using cron expression with the env var `AUTO_ANNOUNCE_CRON_EXPRESSION`.
+<br>The time between each message can be configured using cron expression with the environment variable `AUTO_ANNOUNCE_CRON_EXPRESSION`.
 
 It is recommended to follow this pattern to name the `.announce` files:
 <br>`00-something.announce` `01-something.announce`
-<br>The first 2 numbers will dictate the order of the message, meaning `00` will be the first message to be displayed and after the amount of time configured with `AUTO_ANNOUNCE_CRON_EXPRESSION` the message `01` will be displayed.
+<br>The first 2 numbers will dictate the order of the message, meaning `00` will be the first message to be displayed and after the amount of time set with `AUTO_ANNOUNCE_CRON_EXPRESSION` the message `01` will be displayed.
 <br>You can replace `something` in the file name with anything that helps you identify the message inside it.
 
 >[!IMPORTANT]
->Announces are limited to 510 characters, this is an limit imposed by the game.
+>Announces are limited to 510 characters, this is a limit imposed by the game.
 
-After mounting the `announce` folder with the messages inside it, you can test each message by running the following command with the message number as the parameter (like `00` or `01`) while the server is running:
+After mounting the `announce` folder with the messages, you can test each message by running the following command with the message number as the parameter (like `00` or `01`) while the server is running:
 ```bash
 docker exec -it container-name testannounce <message number>
 ```
 
-Messages can be modified while the server is running, but the cron expression (`AUTO_ANNOUNCE_CRON_EXPRESSION`) requires an restart to apply.
+Messages can be modified while the server is running, but the cron expression (`AUTO_ANNOUNCE_CRON_EXPRESSION`) requires a restart to apply.
 <br>More info about message formatting for the announcements (like colors!) [here](https://github.com/Diyagi/vrising-server-docker/wiki/Formatting-announce-messages).
