@@ -18,19 +18,20 @@ elif ! isWritable "$gameconfig_dir"; then
     # Exiting since the file does not exist and the directory is not writable.
     LogError "Unable to create $gameconfig_file"
     exit 1
+else
+    LogInfo "Created ServerHostSettings.json"
+    cp "${STEAMAPPSERVER}/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" "$gameconfig_dir"
 fi
 
 LogAction "Compiling ServerGameSettings.json"
 
-export GAME_DIFFICULTY=${GAME_DIFFICULTY:-"Normal"}
-export GAMEMODE_TYPE=${GAMEMODE_TYPE:-"PvP"}
-export CLAN_SIZE=${CLAN_SIZE:-4}
+# If anything goes wrong, we bail
+set -e
 
-jq '.GameDifficulty = env.GAME_DIFFICULTY |
-    .GameModeType = env.GAMEMODE_TYPE |
-    .ClanSize = (env.CLAN_SIZE | tonumber)' \
-  < "${STEAMAPPSERVER}/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" \
-  > "${gameconfig_file}"
+# ModifyJsonKey key value jsonarg jsonfile
+ModifyJsonKey "GameDifficulty" "${GAME_DIFFICULTY}" false "$gameconfig_file"
+ModifyJsonKey "GameModeType" "${GAMEMODE_TYPE}" false "$gameconfig_file"
+ModifyJsonKey "ClanSize" "${CLAN_SIZE}" true "$gameconfig_file"
 
 ExitCode=$?
 

@@ -170,3 +170,26 @@ ParseRCONAccess() {
     > "${SCRIPTSDIR}/rcon.yaml"
     return 0
 }
+
+# Modify Json files only if the value is not empty
+# This should allow env vars to work whith manually modified json files
+# return 0 if theres nothing to modify or if the JQ command was successful
+# return whatever JQ returns if there was an error
+ModifyJsonKey() {
+    local key=$1
+    local value=$2
+    local jsonarg=$3
+    local jsonFile=$4
+
+    if [[ -z ${value} ]]; then
+        return 0
+    fi
+
+    if [[ $jsonarg ]]; then
+        jq --arg jsonkey "$key" --arg jsonvalue "$value" 'setpath(($jsonkey | split(".")); $jsonvalue)' "$jsonFile" | sponge "$jsonFile"
+    else
+        jq --arg jsonkey "$key" --jsonargs jsonvalue "$value" 'setpath(($jsonkey | split(".")); $jsonvalue)' "$jsonFile" | sponge "$jsonFile"
+    fi
+
+    return $?
+}

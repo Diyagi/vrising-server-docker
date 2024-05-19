@@ -64,7 +64,7 @@ if [ "$RCON_ENABLED" == 1 ]; then
 fi
 
 LogAction "GENERATING CRONTAB"
-truncate -s 0  "${SCRIPTSDIR}/crontab"
+truncate -s 0 "${SCRIPTSDIR}/crontab"
 
 if [ "${AUTO_UPDATE_ENABLED,,}" = true ] && [ "${UPDATE_ON_BOOT}" = true ]; then
     LogInfo "Adding cronjob for auto updating"
